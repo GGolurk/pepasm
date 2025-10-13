@@ -1,5 +1,8 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
-
+import java.io.FileReader;
+import java.io.BufferedReader;
 import static java.util.Map.entry;
 
 public class pepasm {
@@ -17,5 +20,32 @@ public class pepasm {
 
         String fileName = args[0];
         Integer[] branchLocations = new Integer[0];
+
+        BufferedReader br;
+        try {
+            FileReader fr = new FileReader(fileName);
+            br = new BufferedReader(fr);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        String line;
+        while (true) {
+            try {
+                if (null == br.readLine()) break;
+                // Actually reading the file
+                line = br.readLine();
+                // If there is a comment, remove the comment.
+                if(line.contains(";")){
+                    String[] split = line.split(";");
+                    for(int i = 0; i < split.length; i++){
+                        System.out.println(split[i]);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 }
