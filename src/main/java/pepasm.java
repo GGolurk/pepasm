@@ -19,7 +19,7 @@ public class pepasm {
         );
 
         String fileName = args[0];
-        Integer[] branchLocations = new Integer[0];
+        Map<String, Integer> branchLocations = Map.of();
 
         BufferedReader br;
         try {
@@ -32,15 +32,17 @@ public class pepasm {
         String line;
         while (true) {
             try {
-                if (null == br.readLine()) break;
-                // Actually reading the file
+                // reading the file
                 line = br.readLine();
-                // If there is a comment, remove the comment.
-                if(line.contains(";")){
-                    String[] split = line.split(";");
-                    for(int i = 0; i < split.length; i++){
-                        System.out.println(split[i]);
-                    }
+
+                // Ends loop if EOF
+                if(line.contains(".END")){
+                    break;
+                }
+
+                String[] splitLine = line.split(" ");
+                for(int i = 0; i < splitLine.length; i++){
+                    System.out.println(splitLine[i]);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
