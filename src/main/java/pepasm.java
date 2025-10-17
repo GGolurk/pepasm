@@ -10,7 +10,7 @@ public class pepasm {
         Map<String, Integer> instructions = Map.ofEntries(
                 entry("STBA", 15), entry("LDBA", 13), entry("STWA", 14),
                 entry("LDWA", 12), entry("ANDA", 8), entry("CPBA", 11),
-                entry("BRNE", 25), entry("ADDA", 6), entry("SUBA", 7)
+                entry("BRNE", 26), entry("ADDA", 6), entry("SUBA", 7)
         ); //value associated with value in pep
         // Called zeroInstructions because they start with a 0.
         // They have a separate map because they do not take an input.
@@ -24,7 +24,7 @@ public class pepasm {
         );
 
         String fileName = args[0];
-        Map<String, Integer> branchLocations = Map.of();
+        Map<String, Integer> branchLocations = new HashMap<>(Map.of());
 
         BufferedReader br;
         try {
@@ -35,6 +35,8 @@ public class pepasm {
         }
 
         String line;
+        // Keeps track of where we are in memory
+        Integer count = 0;
         while (true) {
             try {
                 // reading the file
@@ -42,9 +44,18 @@ public class pepasm {
 
                 // Ends loop if EOF
                 if(line == null || line.contains(".END")){
-                    System.out.print(" zz");
+                    System.out.print("zz");
                     break;
                 }
+
+                //removes all whitespace before and after the string
+                line = line.trim();
+                if(line.contains(":")) {
+                    String[] label = line.split(":");
+                    line = label[1];
+                    branchLocations.put(label[0], count);
+                }
+
                 //removes all whitespace before and after the string
                 line = line.trim();
                 if (line.isEmpty()) continue;
@@ -53,7 +64,7 @@ public class pepasm {
                 String instruction = splitLine[0].toUpperCase();
 
                 if (zeroInstructions.containsKey(instruction)) {
-                    System.out.print(zeroInstructions.get(instruction));
+                    System.out.print(zeroInstructions.get(instruction) + " ");
                 }
 
                 else if (instructions.containsKey(instruction)) {
@@ -64,6 +75,13 @@ public class pepasm {
                     } else {
                         address = "0x0000";
                     }
+
+                    //make sure that address is a hex number and not a label
+                    if(instruction.equals("BRNE")){
+                        address = address.replace(",", "");
+                        address = String.valueOf(branchLocations.get(address));
+                    }
+
                     //getting rid of commas and prefixes
                     address = address.replace(",", "").replace("0x", "");
                     //convert to hex
@@ -71,7 +89,11 @@ public class pepasm {
                     //get instruction specifier & add to instruction
                     int specifier = instructionSpecifiers.get(splitLine[2]);
                     hexCode += String.valueOf(specifier);
+                    if(instruction.equals("BRNE")){
+                        hexCode = hexCode.replace("0", "");
+                    }
                     System.out.print(hexCode + " ");
+                    count++;
                     //making sure that we have a four digit hex number
                     while(address.length() < 4){
                         address = "0" + address;
@@ -80,6 +102,7 @@ public class pepasm {
                     for (int i = 0; i < address.length(); i += 2) {
                         String byteChunk = address.substring(i, i + 2);
                         System.out.print(byteChunk + " ");
+                        count++;
                     }
                 }
                 else {
